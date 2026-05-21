@@ -1,16 +1,21 @@
 #include "TopicControl.hh"
+
+#include <gz/sim/components/Pose.hh>
+#include <gz/sim/components/LinearVelocityCmd.hh>
+#include <gz/sim/components/AngularVelocityCmd.hh>
 #include <gz/common/Console.hh>
 #include <gz/math/Pose3.hh>
 #include <gz/math/Quaternion.hh>
+#include <gz/plugin/Register.hh>
 
 using namespace gz;
 using namespace sim;
 using namespace systems;
 
 //Constructor and Deconstructor
-TopicControl::TopicControl() { std::cout << "Plugin Started" << std::endl; }
+TopicControl::TopicControl() { gzdbg << "Plugin Started" << std::endl; }
 
-TopicControl::~TopicControl() { std::cout << "Plugin Stopped" << std::endl; }
+TopicControl::~TopicControl() { gzdbg << "Plugin Stopped" << std::endl; }
 
 //Plugin Configuration
 //Only called Once
@@ -126,9 +131,6 @@ void TopicControl::PreUpdate(const gz::sim::UpdateInfo &_info,
 
 
     gzdbg << "Pose and velocities reset" << std::endl;
-
-
-    this->reset = false;
 }
 
 GZ_ADD_PLUGIN(gz::sim::systems::TopicControl, gz::sim::System,

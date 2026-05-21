@@ -1,17 +1,12 @@
 #ifndef SYSTEM_PLUGIN_MODEL_HH_
 #define SYSTEM_PLUGIN_MODEL_HH_
 
-#include "gz/sim/Model.hh"
-#include "gz/sim/components/LinearVelocityCmd.hh"
-#include "gz/sim/components/AngularVelocityCmd.hh"
-#include "gz/sim/components/Name.hh"
-#include "gz/sim/components/Pose.hh"
-
-#include <gz/plugin/Register.hh>
+#include <gz/sim/Model.hh>
+#include <gz/sim/components/Name.hh>
 #include <gz/sim/System.hh>
-
 #include <gz/msgs/empty.pb.h>
 #include <gz/transport/Node.hh>
+
 
 namespace gz::sim::systems {
     class TopicControl :
@@ -36,6 +31,7 @@ namespace gz::sim::systems {
         std::string modelName;
         std::string topicName;
         std::atomic<bool> reset{false};
+        //This bool is atomic since gz-transport runs in a different thread https://gazebosim.org/docs/harmonic/architecture/
         std::atomic<bool> clearVelocity{false};
         Entity targetEntity{kNullEntity};
         transport::Node node;

@@ -1,20 +1,25 @@
 default:
   just --list
 
+#Build plugin
 build:
     #!/usr/bin/env bash
-    cd ./plugins/topic_controller/build
+    cd ./topic_controller/build
     cmake ..
     make
 
-debug: build
+#Build plugin then start Gazebo with Verbosity
+debug FILE: build
     #!/usr/bin/env bash
-    cd ./plugins/topic_controller/
+    cd ./topic_controller/
     export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build
-    gz sim -v 4 test.sdf
+    cd ../
+    gz sim -v 4 {{FILE}}
 
-start:
+#Start Gazebo without rebuilding plugin
+start FILE:
     #!/usr/bin/env bash
-    ch ./plugins/topic_controller/
-    export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build
-    gz sim test.sdf
+    cd ./topic_controller/
+    export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build:
+    cd ../
+    gz sim {{FILE}}
