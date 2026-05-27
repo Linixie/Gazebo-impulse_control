@@ -54,6 +54,10 @@ just debug PATH/TO/FILE #(example: ./topic_controller/test.sdf for a simple test
 If you prefer not to use the just script, or if you don't want to run Gazebo manually from the repository folder, you must add the plugins build directory to the `GZ_SIM_SYSTEM_PLUGIN_PATH` environment variable so Gazebo can find it:
 
 ```bash
-export GZ_SIM_SYSTEM_PLUGIN_PATH=PATH/TO/REPO/Gazebo_Topic_Controller/topic_controller/build:$GZ_SIM_SYSTEM_PLUGIN_PATH
+cd PATH/TO/REPO/Gazebo_Topic_Controller/topic_controller/
+mkdir build
+cd build
+cmake .. && make
+export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd):$GZ_SIM_SYSTEM_PLUGIN_PATH
 gz sim PATH/TO/FILE.sdf
 ```
