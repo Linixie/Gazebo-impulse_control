@@ -1,6 +1,11 @@
 # Gazebo Topic Controller
 
-A Gazebo Harmonic plugin that stops a specified model when a message is published to a designated topic.
+Built for Continuous Reinforcement Learning (CRL), this Gazebo Harmonic plugin recovers simulated robots from unsavable states caused by exaggerated world physics. To avoid the time penalty of reloading a model over 50,000+ cycles, it uses topic messages to instantly execute a reload-free reset:
+
+- Halts the model's movement.
+- Resets its rotation.
+- Applies momentary linear and angular velocities dynamically defined by the message contents.
+
 
 ## Usage
 
