@@ -1,3 +1,4 @@
+#List all Recipes
 default:
   just --list
 
