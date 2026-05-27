@@ -13,7 +13,7 @@ build:
 debug FILE: build
     #!/usr/bin/env bash
     cd ./topic_controller/
-    export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build
+    export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build:GZ_SIM_SYSTEM_PLUGIN_PATH
     cd ../
     gz sim -v 4 {{FILE}}
 
@@ -21,6 +21,6 @@ debug FILE: build
 start FILE:
     #!/usr/bin/env bash
     cd ./topic_controller/
-    export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build:
+    export GZ_SIM_SYSTEM_PLUGIN_PATH=$(pwd)/build:GZ_SIM_SYSTEM_PLUGIN_PATH
     cd ../
     gz sim {{FILE}}
