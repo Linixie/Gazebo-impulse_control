@@ -51,7 +51,8 @@ void TopicControl::Configure(const gz::sim::Entity &_entity,
 
 
 //When receiving Message save Boolean in this->reset
-void TopicControl::OnTransportMsg(const gz::msgs::Empty &_msg) {
+void TopicControl::OnTransportMsg(const gz::msgs::Twist &_msg) {
+    this->targetVel = _msg;
     this->reset.store(true);
 }
 
@@ -117,12 +118,12 @@ void TopicControl::PreUpdate(const gz::sim::UpdateInfo &_info,
     for (const auto &linkEntity: links) {
         _ecm.SetComponentData<gz::sim::components::LinearVelocityCmd>(
             linkEntity,
-            gz::math::Vector3d::Zero
+            msgs::Convert(this->targetVel.linear())
         );
 
         _ecm.SetComponentData<gz::sim::components::AngularVelocityCmd>(
             linkEntity,
-            gz::math::Vector3d::Zero
+            msgs::Convert(this->targetVel.angular())
         );
     }
 

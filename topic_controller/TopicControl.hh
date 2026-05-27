@@ -4,7 +4,7 @@
 #include <gz/sim/Model.hh>
 #include <gz/sim/components/Name.hh>
 #include <gz/sim/System.hh>
-#include <gz/msgs/empty.pb.h>
+#include <gz/msgs/twist.pb.h>
 #include <gz/transport/Node.hh>
 
 
@@ -35,9 +35,10 @@ namespace gz::sim::systems {
         std::atomic<bool> clearVelocity{false};
         Entity targetEntity{kNullEntity};
         transport::Node node;
+        msgs::Twist targetVel;
 
         //If message gets Received this function gets called
-        void OnTransportMsg(const msgs::Empty &_msg);
+        void OnTransportMsg(const msgs::Twist &_msg);
     };
 } // namespace gz::sim::systems
 
