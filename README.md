@@ -1,6 +1,6 @@
 # Gazebo Topic Controller
 
-Built for Continuous Reinforcement Learning (CRL), this Gazebo Harmonic plugin recovers simulated robots from unsavable states caused by exaggerated world physics. To avoid the time penalty of reloading a model over 50,000+ cycles, it uses topic messages to instantly execute a reload-free reset:
+Built for Continuous Reinforcement Learning (CRL), this Gazebo Harmonic plugin can be used to recover simulated robots from unsavable states caused by exaggerated world physics. To avoid the time penalty of reloading a model over 50,000+ cycles, it uses topic messages to instantly execute a reload-free reset:
 
 - Halts the model's movement.
 - Resets its rotation.
