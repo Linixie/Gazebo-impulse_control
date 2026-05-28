@@ -9,24 +9,53 @@ Built for Continuous Reinforcement Learning (CRL), this Gazebo Harmonic plugin c
 
 ## Usage
 
-### Plugin Integration
-To add the plugin to an existing `.sdf` file, include the following XML snippet inside your `<world>` tag.
+### 1) Add the plugin to your world (SDF)
 
-In this example, the plugin stops the `box` model when a message is received on the `/reset` topic:
+Insert the plugin block anywhere inside the `<world>` element. Configure:
+
+- `<model_name>`: the name of the model you want to reset
+- `<topic_name>`: the topic name 
+
+Example (resets the `box` model when a message is received on `/reset`):
 
 ```xml
 <world name="empty">
-    <!-- Other world elements -->
+  <!-- Other world elements -->
 
-    <plugin name="gz::sim::systems::TopicControl" filename="TopicControl">
-        <model_name>box</model_name>
-        <topic_name>reset</topic_name>
-    </plugin>
+  <plugin name="gz::sim::systems::TopicControl" filename="TopicControl">
+    <model_name>box</model_name>
+    <topic_name>reset</topic_name>
+  </plugin>
 
-    <!-- Other world elements -->
+  <!-- Other world elements -->
 </world>
 ```
 
+### 2) Publish a reset message
+
+The plugin listens for `gz.msgs.Twist` messages and when a message arrives, it stops the model, resets its rotation, and (optionally) applies the linear/angular velocities provided in the message.
+
+**Send a Twist (apply velocities):**
+
+```bash
+gz topic -t /reset -m gz.msgs.Twist -p '
+linear {
+  x: 0.0
+  y: 0.0
+  z: 0.0
+}
+angular {
+  x: 0.0
+  y: 0.0
+  z: 0.0
+}'
+```
+
+**Send an empty message (reset rotation only, no velocities applied):**
+
+```bash
+gz topic -t /reset -m gz.msgs.Twist -p ''
+```
 ## Dependencies
 
 Make sure you have the following dependencies installed:
