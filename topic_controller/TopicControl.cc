@@ -13,9 +13,13 @@ using namespace sim;
 using namespace systems;
 
 //Constructor and Deconstructor
-TopicControl::TopicControl() { gzdbg << "Plugin Started" << std::endl; }
+TopicControl::TopicControl() {
+    gzdbg << "Plugin Started" << '\n';
+}
 
-TopicControl::~TopicControl() { gzdbg << "Plugin Stopped" << std::endl; }
+TopicControl::~TopicControl() {
+    gzdbg << "Plugin Stopped" << '\n';
+}
 
 //Plugin Configuration
 //Only called Once
@@ -25,24 +29,24 @@ void TopicControl::Configure(const gz::sim::Entity &_entity,
                              gz::sim::EventManager & /*_eventMgr*/) {
     //Read Target Model_Name from .sdf file
     if (!_sdf->HasElement("model_name")) {
-        gzerr << "MoveModel plugin requires a <model_name> element." << std::endl;
+        gzerr << "MoveModel plugin requires a <model_name> element." << '\n';
         return;
     }
 
 
     this->modelName = _sdf->Get<std::string>("model_name");
-    gzmsg << "Target Model Name: " << this->modelName << std::endl;
+    gzmsg << "Target Model Name: " << this->modelName << '\n';
 
 
     //Read Target Topic_Name from .sdf file
     if (!_sdf->HasElement("topic_name")) {
-        gzerr << "MoveModel plugin requires a <topic_name> element." << std::endl;
+        gzerr << "MoveModel plugin requires a <topic_name> element." << '\n';
         return;
     }
 
 
     this->topicName = _sdf->Get<std::string>("topic_name");
-    gzmsg << "Topic Name: " << this->topicName << std::endl;
+    gzmsg << "Topic Name: " << this->topicName << '\n';
 
 
     //Start Listening for Messages
@@ -50,7 +54,7 @@ void TopicControl::Configure(const gz::sim::Entity &_entity,
 }
 
 
-//When receiving Message save Boolean in this->reset
+//When receiving Message set this->reset to true and save msg
 void TopicControl::OnTransportMsg(const gz::msgs::Twist &_msg) {
     this->targetVel = _msg;
     this->reset.store(true);
@@ -64,17 +68,19 @@ void TopicControl::PreUpdate(const gz::sim::UpdateInfo &_info,
         const auto entityOpt = _ecm.EntityByName(this->modelName);
         if (!entityOpt.has_value()) {
             gzdbg << "Model [" << this->modelName
-                    << "] not found yet. Skipping velocity application." << std::endl;
+                    << "] not found yet. Skipping velocity application." << '\n';
             return;
         }
 
         this->targetEntity = entityOpt.value();
-        gzmsg << "Found target model entity: " << this->targetEntity << std::endl;
+        gzmsg << "Found target model entity: " << this->targetEntity << '\n';
     }
 
 
     //Remove VelocityCmd Components
     //https://github.com/gazebosim/gz-sim/issues/1926
+    //https://github.com/gazebosim/gz-sim/pull/2228
+    //Not yet backported to Harmonic
     if (this->clearVelocity.exchange(false)) {
         const gz::sim::Model model(this->targetEntity);
         const auto links = model.Links(_ecm);
@@ -85,8 +91,8 @@ void TopicControl::PreUpdate(const gz::sim::UpdateInfo &_info,
     }
 
 
-    //Return if reset is not set
-    if (!this->reset.exchange(false)) {
+    //Return if paused or reset is not set
+    if (_info.paused || !this->reset.exchange(false)) {
         return;
     }
 
@@ -96,24 +102,18 @@ void TopicControl::PreUpdate(const gz::sim::UpdateInfo &_info,
 
 
     if (!poseComp) {
-        gzdbg << "Pose component not found" << std::endl;
+        gzdbg << "Pose component not found" << '\n';
         return;
     }
 
 
     gz::math::Pose3d newPose = poseComp->Data();
-
-
     newPose.Rot() = gz::math::Quaterniond::Identity;
-
-
     gz::sim::Model model(this->targetEntity);
-
-
     model.SetWorldPoseCmd(_ecm, newPose);
 
 
-    //Apply zero vector to all links
+    //Apply vector to all links
     const auto links = model.Links(_ecm);
     for (const auto &linkEntity: links) {
         _ecm.SetComponentData<gz::sim::components::LinearVelocityCmd>(
@@ -131,7 +131,7 @@ void TopicControl::PreUpdate(const gz::sim::UpdateInfo &_info,
     this->clearVelocity.store(true);
 
 
-    gzdbg << "Pose and velocities reset" << std::endl;
+    gzdbg << "Pose and velocities reset" << '\n';
 }
 
 GZ_ADD_PLUGIN(gz::sim::systems::TopicControl, gz::sim::System,

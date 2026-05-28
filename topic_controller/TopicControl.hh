@@ -31,7 +31,6 @@ namespace gz::sim::systems {
         std::string modelName;
         std::string topicName;
         std::atomic<bool> reset{false};
-        //This bool is atomic since gz-transport runs in a different thread https://gazebosim.org/docs/harmonic/architecture/
         std::atomic<bool> clearVelocity{false};
         Entity targetEntity{kNullEntity};
         transport::Node node;
@@ -40,6 +39,8 @@ namespace gz::sim::systems {
         //If message gets Received this function gets called
         void OnTransportMsg(const msgs::Twist &_msg);
     };
-} // namespace gz::sim::systems
+}
+
+// namespace gz::sim::systems
 
 #endif
