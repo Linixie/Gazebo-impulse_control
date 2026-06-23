@@ -11,7 +11,7 @@ Built for Continuous Reinforcement Learning (CRL), this Gazebo Harmonic plugin c
 
 ### 1) Add the plugin to your world (SDF)
 
-Insert the plugin block anywhere inside the `<world>` element. Configure:
+Insert the plugin block anywhere inside the `<model>` element. Configure:
 
 - `<model_name>`: the name of the model you want to reset
 - `<topic_name>`: the topic name 
@@ -19,16 +19,15 @@ Insert the plugin block anywhere inside the `<world>` element. Configure:
 Example (resets the `box` model when a message is received on `/reset`):
 
 ```xml
-<world name="empty">
-  <!-- Other world elements -->
+<model name="box">
+  <!-- Other model elements -->
 
   <plugin name="gz::sim::systems::TopicControl" filename="TopicControl">
-    <model_name>box</model_name>
     <topic_name>reset</topic_name>
   </plugin>
 
-  <!-- Other world elements -->
-</world>
+  <!-- Other model elements -->
+</model>
 ```
 
 ### 2) Publish a reset message
@@ -73,9 +72,9 @@ sudo apt install gz-harmonic gz-launch7-cli gz-plugin2-cli gz-sim8-cli gz-tools2
 Clone the repository and build the project using just:
 
 ```bash
-git clone https://github.com/Linixie/Gazebo_Topic_Controller.git
-cd Gazebo_Topic_Controller/
-just debug PATH/TO/FILE #(example: ./topic_controller/test.sdf for a simple test world)
+git clone https://github.com/Linixie/Gazebo-impulse_control.git
+cd Gazebo-impulse_control/
+just debug PATH/TO/FILE #(example: ./impulse_control/test.sdf for a simple test world)
 ```
 
 ### Running Manually (Without just)
@@ -83,7 +82,7 @@ just debug PATH/TO/FILE #(example: ./topic_controller/test.sdf for a simple test
 If you prefer not to use the just script, or if you don't want to run Gazebo manually from the repository folder, you must add the plugins build directory to the `GZ_SIM_SYSTEM_PLUGIN_PATH` environment variable so Gazebo can find it:
 
 ```bash
-cd PATH/TO/REPO/Gazebo_Topic_Controller/topic_controller/
+cd PATH/TO/REPO/Gazebo-impulse_control/impulse_control/
 mkdir build
 cd build
 cmake .. && make
