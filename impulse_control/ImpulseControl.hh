@@ -8,7 +8,7 @@ namespace gz::sim::systems {
     class ImpulseControlPrivate;
 
     /// \brief A plugin that applies an impulse velocity and resets the rotation
-            /// of the model it is attached to.
+    /// of the model it is attached to.
     class ImpulseControl
             : public System,
               public ISystemConfigure,

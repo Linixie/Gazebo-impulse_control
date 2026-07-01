@@ -1,7 +1,6 @@
 #include "ImpulseControl.hh"
 
 #include <mutex>
-#include <string>
 
 #include <gz/common/Console.hh>
 #include <gz/math/Pose3.hh>
@@ -10,7 +9,6 @@
 #include <gz/msgs/Utility.hh>
 #include <gz/plugin/Register.hh>
 #include <gz/sim/Model.hh>
-#include <gz/sim/Util.hh>
 #include <gz/sim/components/AngularVelocityCmd.hh>
 #include <gz/sim/components/LinearVelocityCmd.hh>
 #include <gz/sim/components/Pose.hh>
@@ -23,7 +21,6 @@ using namespace systems;
 namespace gz::sim::systems {
     class ImpulseControlPrivate {
         /// \brief Callback for model Twist subscription
-    /// \param[in] _msg Twist message
     public:
         void OnTransportMsg(const msgs::Twist &_msg);
 
@@ -104,7 +101,20 @@ namespace gz::sim::systems {
         if (_info.paused)
             return;
 
-        // 1. Remove previously applied VelocityCmd Components if requested
+        // 1. Safely grab the latest message data first
+        msgs::Twist velMsg;
+        bool hasNewMsg = false;
+
+        {
+            std::scoped_lock lock(this->dataPtr->msgMutex);
+            if (this->dataPtr->reset) {
+                velMsg = this->dataPtr->targetVel;
+                hasNewMsg = true;
+                this->dataPtr->reset = false;
+            }
+        }
+
+        // 2. Remove previously applied VelocityCmd Components before applying new ones
         bool shouldClear = false;
         {
             std::scoped_lock lock(this->dataPtr->msgMutex);
@@ -122,23 +132,10 @@ namespace gz::sim::systems {
             }
         }
 
-        // 2. Safely grab the latest message data
-        msgs::Twist velMsg;
-        bool hasNewMsg = false;
-
-        {
-            std::scoped_lock lock(this->dataPtr->msgMutex);
-            if (this->dataPtr->reset) {
-                velMsg = this->dataPtr->targetVel;
-                hasNewMsg = true;
-                this->dataPtr->reset = false;
-            }
-        }
-
         if (!hasNewMsg)
             return;
 
-        // 3. Get current pose and remove rotations
+        // 3. Get current pose and remove rotations (preserve position)
         const auto poseComp = _ecm.Component<components::Pose>(this->dataPtr->model.Entity());
 
         if (!poseComp) {
@@ -151,18 +148,14 @@ namespace gz::sim::systems {
         newPose.Rot() = math::Quaterniond::Identity;
         this->dataPtr->model.SetWorldPoseCmd(_ecm, newPose);
 
-        // 4. Apply vector to all links
+        // 4. Apply vector to all links (zero velocities included — intentional stop)
         const auto links = this->dataPtr->model.Links(_ecm);
         for (const auto &linkEntity: links) {
             _ecm.SetComponentData<components::LinearVelocityCmd>(
-                linkEntity,
-                msgs::Convert(velMsg.linear())
-            );
+                linkEntity, msgs::Convert(velMsg.linear()));
 
             _ecm.SetComponentData<components::AngularVelocityCmd>(
-                linkEntity,
-                msgs::Convert(velMsg.angular())
-            );
+                linkEntity, msgs::Convert(velMsg.angular()));
         }
 
         // 5. Trigger clearing for the next frame
@@ -174,7 +167,8 @@ namespace gz::sim::systems {
         gzdbg << "Pose and velocities reset for model ["
                 << this->dataPtr->model.Name(_ecm) << "]" << '\n';
     }
-}
+} // namespace gz::sim::systems
+
 GZ_ADD_PLUGIN(ImpulseControl,
               System,
               ImpulseControl::ISystemConfigure,
